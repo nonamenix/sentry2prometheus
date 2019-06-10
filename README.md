@@ -1,4 +1,4 @@
-# Sentry Errors Exporter to Prometheus
+# Sentry Errors Prometheus Exporter 
 
 ```bash
 ./sentry2prometheus --help
