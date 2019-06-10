@@ -2,6 +2,7 @@
 
 ```bash
 ./sentry2prometheus --help
+
 Usage of ./sentry2prometheus:
   -organization string
     	Organization name in sentry (default "XXX")
@@ -27,10 +28,10 @@ go build
 ## Usage Example
 
 ```bash
-./sentry2prometheus 
-    --sentry-url=https://sentry.io 
-    --organization=XXX 
-    --query=team:project 
+./sentry2prometheus \
+    --sentry-url=https://sentry.io \
+    --organization=XXX \
+    --query=team:project \ 
     --token=7daef5d63f6746ae8b1f5abe2e3872786ee7cea23ade46e29b536c28463ebe
 ```
 
