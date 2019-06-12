@@ -2,30 +2,47 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
+	flag "github.com/spf13/pflag"
 )
 
 func init() {
 	prometheus.MustRegister(version.NewCollector("sentry2prometheus"))
 }
 
+func getLabelsRepr(labels map[string]string) string {
+	repr := ""
+	for label, value := range labels {
+		repr += ", " + label + "=" + "\"" + value + "\""
+	}
+	return repr
+}
+
 func main() {
 	var (
 		sentryURL          = flag.String("sentry-url", "https://sentry.io", "The sentry url")
-		organization       = flag.String("organization", "wargaming", "Organization name in sentry")
+		organization       = flag.String("organization", "XXX", "Organization name in sentry")
 		statsPeriod        = flag.String("stats-period", "24h", "Sentry stats period")
 		query              = flag.String("query", "", "Sentry query for projects filtering")
 		listenAddress      = flag.String("port", ":9412", "The address to listen on for HTTP requests.")
 		authorizationToken = flag.String("token", "", "Sentry API authorization token")
+		extraLabelsRaw     = flag.StringSlice("extra-labels", []string{}, "Extra labels for prometheus metrics splitted by ':'")
 	)
 	flag.Parse()
+
+	extraLabels := map[string]string{}
+	for _, rawLabel := range *extraLabelsRaw {
+		splitted := strings.Split(rawLabel, ":")
+		extraLabels[splitted[0]] = splitted[1]
+	}
+	log.Infoln("extra labes", extraLabels)
 
 	var config = Config{
 		sentryURL:          *sentryURL,
@@ -33,6 +50,7 @@ func main() {
 		query:              *query,
 		statsPeriod:        *statsPeriod,
 		authorizationToken: *authorizationToken,
+		extraLabels:        extraLabels,
 	}
 
 	log.Infoln("Starting sentry2prometheus", version.Info())
@@ -69,7 +87,7 @@ func SentryOrganizationMetricsHandler(config Config, responseWriter http.Respons
 		timestamp := int(stat[0])
 		errorsCount := int(stat[1])
 
-		fmt.Fprintf(responseWriter, "probe_sentry_errors_received{project=\"%s\", timestamp=\"%d\"} %d\n", project.Slug, timestamp, errorsCount)
+		fmt.Fprintf(responseWriter, "probe_sentry_errors_received{project=\"%s\", timestamp=%d%s} %d\n", project.Slug, timestamp, getLabelsRepr(config.extraLabels), errorsCount)
 	}
 	fmt.Fprintln(responseWriter, "probe_success 1")
 	fmt.Fprintf(responseWriter, "probe_projects_count %d\n", len(projects))
@@ -94,6 +112,7 @@ type Config struct {
 	query              string
 	authorizationToken string
 	timeout            time.Duration
+	extraLabels        map[string]string
 }
 
 func fetchErrorsFromSentryHandler(config Config) ([]Project, error) {
