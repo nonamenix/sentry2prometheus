@@ -1,4 +1,4 @@
-# sentry2prometheus exporter
+# Sentry Errors Prometheus Exporter 
 
 ```bash
 ./sentry2prometheus --help
@@ -31,7 +31,15 @@ Take sentry token from https://sentry.io/api
     --query=team:web \
     --token=token_from_sentry \
     --extra-labels=team:web
-
 ```
 
 Visiting [http://localhost:9412/](http://localhost:9412/) will return metrics for a the sentry projects in your `organization` filtered by `query`
+
+```text
+# HELP probe_sentry_errors_received Errors count since timestamp
+# TYPE probe_sentry_errors_received counter
+probe_sentry_errors_received{project="portal", timestamp=1560322800, team="web"} 5
+probe_success 1
+probe_projects_count 1
+probe_duration_seconds 0.132
+```
