@@ -27,15 +27,22 @@ func getLabelsRepr(labels map[string]string) string {
 
 func main() {
 	var (
+		// Server
+		listenAddress = flag.String("port", ":9412", "The address to listen on for HTTP requests.")
+
+		// Sentry cli config
 		sentryURL          = flag.String("sentry-url", "https://sentry.io", "The sentry url")
 		organization       = flag.String("organization", "XXX", "Organization name in sentry")
 		statsPeriod        = flag.String("stats-period", "24h", "Sentry stats period")
 		query              = flag.String("query", "", "Sentry query for projects filtering")
-		listenAddress      = flag.String("port", ":9412", "The address to listen on for HTTP requests.")
 		authorizationToken = flag.String("token", "", "Sentry API authorization token")
 		extraLabelsRaw     = flag.StringSlice("extra-labels", []string{}, "Extra labels for prometheus metrics splitted by ':'")
+
+		// Sentry config file
+		configPath = flag.String("config", "config.yml", "YML config path")
 	)
 	flag.Parse()
+	log.Infoln(*configPath)
 
 	extraLabels := map[string]string{}
 	for _, rawLabel := range *extraLabelsRaw {
