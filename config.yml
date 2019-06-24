@@ -1,0 +1,8 @@
+sources:
+  - sentry-url: https://sentry.io
+    token: XXX
+    extraLabels:
+      - "game:wows"
+    organization: XXX
+    query: "team:BISMARCK"
+    stats-period: "24h"
