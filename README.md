@@ -1,5 +1,7 @@
 # Sentry Errors Prometheus Exporter 
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/nonamenix/sentry2prometheus)](https://goreportcard.com/report/github.com/nonamenix/sentry2prometheus)
+
 ```bash
 ./sentry2prometheus --help
 
