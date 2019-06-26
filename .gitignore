@@ -1,0 +1,8 @@
+*.cov
+.cover
+/logs/
+.vscode
+.idea/
+*.test
+.DS_Store
+/bin/
