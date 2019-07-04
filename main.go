@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
 	// "io/ioutil"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -67,7 +68,7 @@ func fetchErrorsFromSentryHandler(config Config) ([]Project, error) {
 	defer resp.Body.Close()
 
 	var projects = []Project{}
-	
+
 	decodeErr := json.NewDecoder(resp.Body).Decode(&projects)
 	if decodeErr != nil {
 		log.Errorf("Error on json parsing %s", err)
@@ -76,6 +77,33 @@ func fetchErrorsFromSentryHandler(config Config) ([]Project, error) {
 
 	return projects, nil
 
+}
+
+func SentryOrganizationMetricsHandler(config Config, responseWriter http.ResponseWriter) {
+	start := time.Now()
+
+	projects, err := fetchErrorsFromSentryHandler(config)
+	if err != nil {
+		fmt.Fprintln(responseWriter, "probe_success 0")
+		log.Errorf("Error on sentry projects fetching %s", err)
+		return
+	}
+
+	fmt.Fprintf(responseWriter, "# HELP probe_sentry_errors_received Errors count since timestamp\n")
+	fmt.Fprintf(responseWriter, "# TYPE probe_sentry_errors_received counter\n")
+
+	for _, project := range projects {
+		stat := project.Stats[len(project.Stats)-1]
+		timestamp := int(stat[0])
+		errorsCount := int(stat[1])
+
+		fmt.Fprintf(responseWriter, "probe_sentry_errors_received{project=\"%s\", timestamp=%d%s} %d\n", project.Slug, timestamp, getLabelsRepr(config.extraLabels), errorsCount)
+	}
+	fmt.Fprintln(responseWriter, "probe_success 1")
+	fmt.Fprintf(responseWriter, "probe_projects_count %d\n", len(projects))
+	fmt.Fprintf(responseWriter, "probe_duration_seconds %f\n", time.Since(start).Seconds())
+
+	return
 }
 
 func main() {
@@ -120,31 +148,4 @@ func main() {
 	if err := http.ListenAndServe(*listenAddress, nil); err != nil {
 		log.Fatalf("Error starting HTTP server: %s", err)
 	}
-}
-
-func SentryOrganizationMetricsHandler(config Config, responseWriter http.ResponseWriter) {
-	start := time.Now()
-
-	projects, err := fetchErrorsFromSentryHandler(config)
-	if err != nil {
-		fmt.Fprintln(responseWriter, "probe_success 0")
-		log.Errorf("Error on sentry projects fetching %s", err)
-		return
-	}
-
-	fmt.Fprintf(responseWriter, "# HELP probe_sentry_errors_received Errors count since timestamp\n")
-	fmt.Fprintf(responseWriter, "# TYPE probe_sentry_errors_received counter\n")
-
-	for _, project := range projects {
-		stat := project.Stats[len(project.Stats)-1]
-		timestamp := int(stat[0])
-		errorsCount := int(stat[1])
-
-		fmt.Fprintf(responseWriter, "probe_sentry_errors_received{project=\"%s\", timestamp=%d%s} %d\n", project.Slug, timestamp, getLabelsRepr(config.extraLabels), errorsCount)
-	}
-	fmt.Fprintln(responseWriter, "probe_success 1")
-	fmt.Fprintf(responseWriter, "probe_projects_count %d\n", len(projects))
-	fmt.Fprintf(responseWriter, "probe_duration_seconds %f\n", time.Since(start).Seconds())
-
-	return
 }
