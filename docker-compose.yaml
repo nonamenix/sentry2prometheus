@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  main:
+    build: .
+    ports: 
+      - "9412:9412"
+    command: --token=XXXXX --sentry-url=https://sentry.io --organization=XXX --query=team:web --stats-period=24h

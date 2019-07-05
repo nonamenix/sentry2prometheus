@@ -18,8 +18,9 @@ Usage of ./sentry2prometheus:
 
 ## Build
 
+Work with 1.12 and modules
+
 ```bash
-go install
 go build
 ```
 
