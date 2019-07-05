@@ -5,4 +5,4 @@ services:
     build: .
     ports: 
       - "9412:9412"
-    command: --token=7daef5d63f6746ae8b1f5abe2e3872786ee7cea23ade46e29b536c28463ebe47 --sentry-url=https://sentry.wdo.io --organization=wargaming --query=team:bismarck --stats-period=24h
+    command: --token=XXXXX --sentry-url=https://sentry.io --organization=XXX --query=team:web --stats-period=24h
