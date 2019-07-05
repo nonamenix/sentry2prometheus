@@ -1,3 +1,9 @@
+*.cov
+.cover
+/logs/
+.vscode
 .idea/
-.vscode/
+*.test
+.DS_Store
+/bin/
 sentry2prometheus

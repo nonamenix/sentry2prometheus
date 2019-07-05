@@ -1,5 +1,7 @@
 # Sentry Errors Prometheus Exporter 
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/nonamenix/sentry2prometheus)](https://goreportcard.com/report/github.com/nonamenix/sentry2prometheus)
+
 ```bash
 ./sentry2prometheus --help
 
@@ -31,7 +33,7 @@ Take sentry token from https://sentry.io/api
     --organization=XXX \
     --query=team:web \
     --token=token_from_sentry \
-    --extra-labels=team:web
+    --extra-labels=team:web,one:1,two:2
 ```
 
 Visiting [http://localhost:9412/](http://localhost:9412/) will return metrics for a the sentry projects in your `organization` filtered by `query`
